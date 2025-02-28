@@ -47,10 +47,15 @@ jobs:
       - name: Deploy & Test Application
         run: |
           ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@${{ env.TEMP_IP }} << 'EOF'
+          echo "Checking installed versions..."
+          git --version || echo "Git NOT installed"
+          docker --version || echo "Docker NOT installed"
+          docker-compose --version || echo "Docker Compose NOT installed"
+          python3 --version || echo "Python3 NOT installed"
+          pytest --version || echo "Pytest NOT installed"
           echo "Cloning repository..."
           git clone https://github.com/punnam14/hottake.git
           cd hottake
-
           echo "Creating .env file..."
           cat <<EOT > .env
           DATABASE_URL=${{ secrets.DATABASE_URL }}
