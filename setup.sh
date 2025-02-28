@@ -16,6 +16,7 @@ git clone https://github.com/punnam14/hottake.git
 cd hottake/backend
 
 sudo python3 -m pip install -r requirements.txt
+sudo python3 -m pip install pytest
 
 # Ensure correct ownership & permissions
 sudo chown -R ec2-user:ec2-user /home/ec2-user/hottake/backend
