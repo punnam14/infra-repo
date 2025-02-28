@@ -55,6 +55,14 @@ jobs:
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
         run: |
           ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@${{ env.TEMP_IP }} << 'EOF'
+          export AWS_ECR_BACKEND=${AWS_ECR_BACKEND}
+          export AWS_ECR_FRONTEND=${AWS_ECR_FRONTEND}
+          export DATABASE_URL=${DATABASE_URL}
+          export OPENCAGE_API_KEY=${OPENCAGE_API_KEY}
+          export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+          
           echo "Checking installed versions..."
           git --version || echo "Git NOT installed"
           python3 --version || echo "Python3 NOT installed"
@@ -91,9 +99,9 @@ jobs:
           echo "🔹 Checking AWS Credentials..."
           aws sts get-caller-identity || (echo "AWS Credentials Invalid!" && exit 1)
 
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
+          aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+          aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+          aws configure set aws_session_token ${AWS_SESSION_TOKEN}
           aws configure set region us-east-1
 
           echo "Authenticating Docker with AWS ECR..."
