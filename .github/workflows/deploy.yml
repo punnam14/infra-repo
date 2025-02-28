@@ -68,18 +68,22 @@ jobs:
           OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
           EOT
 
+
           echo "Running tests..."
           cd backend
-          python -m pytest --maxfail=1 --disable-warnings --tb=short
-
+          python3 -m pytest --maxfail=1 --disable-warnings --tb=short
           TEST_EXIT_CODE=\$?
-          if [ \$TEST_EXIT_CODE -ne 0 ]; then
+
+          if ! [[ "\$TEST_EXIT_CODE" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: Test exit code is invalid: \$TEST_EXIT_CODE"
+            exit 1
+          elif [ "\$TEST_EXIT_CODE" -ne 0 ]; then
             echo "Tests FAILED! Exiting workflow..."
             exit 1
           else
             echo "Tests PASSED!"
           fi
-          
+
           cd ..
 
           exit
