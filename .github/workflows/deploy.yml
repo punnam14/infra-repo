@@ -13,10 +13,11 @@ jobs:
 
       - name: Configure AWS CLI
         run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
-          aws configure set region us-east-1
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "aws_session_token=${{ secrets.AWS_SESSION_TOKEN }}" >> ~/.aws/credentials
       
       - name: Launch Temporary EC2 for Testing
         run: |
@@ -45,6 +46,11 @@ jobs:
           chmod 600 github-actions.pem  
 
       - name: Deploy & Test Application
+        env:
+          AWS_ECR_BACKEND: ${{ secrets.AWS_ECR_REPO }}
+          AWS_ECR_FRONTEND: ${{ secrets.AWS_ECR_REPO_FRONTEND }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENCAGE_API_KEY: ${{ secrets.OPENCAGE_API_KEY }}
         run: |
           ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@${{ env.TEMP_IP }} << 'EOF'
           echo "Checking installed versions..."
@@ -55,8 +61,8 @@ jobs:
           cd hottake
           echo "Creating .env file..."
           sudo tee .env > /dev/null <<EOT
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-          OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+          DATABASE_URL=${DATABASE_URL}
+          OPENCAGE_API_KEY=${OPENCAGE_API_KEY}
           EOT
 
           echo "Creating .env file in backend directory..."
@@ -81,20 +87,20 @@ jobs:
           fi
 
           echo "Authenticating Docker with AWS ECR..."
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REPO }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_BACKEND}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_FRONTEND}
 
           echo "Building and pushing backend Docker image..."
           cd /home/ec2-user/hottake/backend
           docker build -t hottake-backend:latest .
-          docker tag hottake-backend:latest ${{ secrets.AWS_ECR_REPO }}/hottake-backend:latest
-          docker push ${{ secrets.AWS_ECR_REPO }}/hottake-backend:latest
+          docker tag hottake-backend:latest ${AWS_ECR_BACKEND}:backend-latest
+          docker push ${AWS_ECR_BACKEND}:backend-latest
 
           echo "Building and pushing frontend Docker image..."
           cd /home/ec2-user/hottake/frontend
           docker build -t hottake-frontend:latest .
-          docker tag hottake-frontend:latest ${{ secrets.AWS_ECR_REPO }}/hottake-frontend:latest
-          docker push ${{ secrets.AWS_ECR_REPO }}/hottake-frontend:latest
+          docker tag hottake-frontend:latest ${AWS_ECR_FRONTEND}:frontend-latest
+          docker push ${AWS_ECR_FRONTEND}:frontend-latest
 
           exit $EXIT_CODE
           EOF
-      
