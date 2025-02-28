@@ -80,6 +80,9 @@ jobs:
             echo "✅ Tests PASSED!"
           fi
 
+          echo "Authenticating Docker with AWS ECR..."
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REPO }}
+
           echo "Building and pushing backend Docker image..."
           cd /home/ec2-user/hottake/backend
           docker build -t hottake-backend:latest .
