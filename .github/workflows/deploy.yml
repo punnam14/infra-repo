@@ -24,7 +24,7 @@ jobs:
             --image-id ami-05b10e08d247fb927\
             --instance-type t2.micro \
             --key-name github-actions \
-            --security-groups sg-05c24e6f774bd9b5d \
+            --security-group-ids sg-05c24e6f774bd9b5d \
             --user-data file://setup.sh \
             --query 'Instances[0].InstanceId' \
             --output text)
