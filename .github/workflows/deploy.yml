@@ -38,3 +38,31 @@ jobs:
             --query 'Reservations[0].Instances[0].PublicIpAddress' \
             --output text)
           echo "TEMP_IP=$TEMP_IP" >> $GITHUB_ENV
+      
+      - name: Save Private Key for SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > github-actions.pem
+          chmod 600 github-actions.pem  
+
+      - name: Deploy & Test Application
+        run: |
+          ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@${{ env.TEMP_IP }} << 'EOF'
+          echo "Cloning repository..."
+          git clone https://github.com/punnam14/hottake.git
+          cd hottake
+
+          echo "Creating .env file..."
+          cat <<EOT > .env
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+          EOT
+
+          echo "Starting application..."
+          docker-compose up -d
+          sleep 20  
+
+          echo "Running tests..."
+          cd backend
+          python -m pytest
+          exit
+          EOF
