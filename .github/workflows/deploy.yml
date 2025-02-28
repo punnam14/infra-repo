@@ -70,19 +70,15 @@ jobs:
           sudo yum install -y sqlite
           python3 -m pip install -r requirements.txt
           python3 -m pytest --maxfail=1 --disable-warnings --tb=short
-          TEST_EXIT_CODE=\$?
+          EXIT_CODE=$?  
+          echo "Pytest Exit Code: $EXIT_CODE"
 
-          if ! [[ "\$TEST_EXIT_CODE" =~ ^[0-9]+$ ]]; then
-            echo "ERROR: Test exit code is invalid: \$TEST_EXIT_CODE"
-            exit 1
-          elif [ "\$TEST_EXIT_CODE" -ne 0 ]; then
-            echo "Tests FAILED! Exiting workflow..."
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "❌ Tests FAILED with exit code: $EXIT_CODE"
             exit 1
           else
-            echo "Tests PASSED!"
+            echo "✅ Tests PASSED!"
           fi
 
-          cd ..
-
-          exit
+          exit $EXIT_CODE
           EOF
