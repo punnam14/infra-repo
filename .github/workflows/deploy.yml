@@ -54,13 +54,13 @@ jobs:
 
           cd hottake
           echo "Creating .env file..."
-          cat <<EOT > .env
+          sudo tee .env > /dev/null <<EOT
           DATABASE_URL=${{ secrets.DATABASE_URL }}
           OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
           EOT
 
           echo "Creating .env file in backend directory..."
-          cat <<EOT > backend/.env
+          sudo tee backend/.env > /dev/null <<EOT
           DATABASE_URL=${{ secrets.DATABASE_URL }}
           OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
           EOT

@@ -15,6 +15,5 @@ cd /home/ec2-user
 git clone https://github.com/punnam14/hottake.git
 cd hottake/backend
 
-sudo python3 -m pip install pytest
-
 sudo python3 -m pip install -r requirements.txt
+sudo python3 -m pip install pytest
