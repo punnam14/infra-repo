@@ -1,0 +1,43 @@
+name: Nightly Deployment 
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: "punnam14/hottake.git"
+          token: ${{ secrets.TOKEN }}
+      
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
+          aws configure set region us-east-1
+      
+      - name: Launch Temporary EC2 for Testing
+        run: |
+          TEMP_INSTANCE_ID=$(aws ec2 run-instances \
+            --image-id ami-05b10e08d247fb927 \ 
+            --instance-type t2.micro \
+            --key-name github-actions \
+            --security-groups sg-05c24e6f774bd9b5d \
+            --user-data file://setup.sh \
+            --query 'Instances[0].InstanceId' \
+            --output text)
+          echo "TEMP_INSTANCE_ID=$TEMP_INSTANCE_ID" >> $GITHUB_ENV
+          
+      - name: Wait for EC2 Instance to Start
+        run: |
+          sleep 60  # Wait 60 seconds for EC2 to boot
+          TEMP_IP=$(aws ec2 describe-instances \
+            --instance-ids ${{ env.TEMP_INSTANCE_ID }} \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' \
+            --output text)
+          echo "TEMP_IP=$TEMP_IP" >> $GITHUB_ENV
