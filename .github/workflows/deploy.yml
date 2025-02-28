@@ -8,12 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          repository: "punnam14/hottake.git"
-          token: ${{ secrets.TOKEN }}
-      
       - name: Configure AWS CLI
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
