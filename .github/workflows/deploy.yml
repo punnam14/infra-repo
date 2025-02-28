@@ -49,8 +49,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@${{ env.TEMP_IP }} << 'EOF'
           echo "Checking installed versions..."
           git --version || echo "Git NOT installed"
-          docker --version || echo "Docker NOT installed"
-          docker-compose --version || echo "Docker Compose NOT installed"
           python3 --version || echo "Python3 NOT installed"
           pytest --version || echo "Pytest NOT installed"
 
@@ -72,13 +70,17 @@ jobs:
 
           echo "Running tests..."
           cd backend
-          python -m pytest
+          python -m pytest --maxfail=1 --disable-warnings --tb=short
 
+          TEST_EXIT_CODE=\$?
+          if [ \$TEST_EXIT_CODE -ne 0 ]; then
+            echo "Tests FAILED! Exiting workflow..."
+            exit 1
+          else
+            echo "Tests PASSED!"
+          fi
+          
           cd ..
-
-          echo "Starting application..."
-          docker-compose up -d
-          sleep 20  
 
           exit
           EOF
