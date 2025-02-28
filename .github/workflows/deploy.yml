@@ -77,8 +77,8 @@ jobs:
 
           echo "Creating .env file in backend directory..."
           sudo tee backend/.env > /dev/null <<EOT
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-          OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+          DATABASE_URL=${DATABASE_URL}
+          OPENCAGE_API_KEY=${OPENCAGE_API_KEY}
           EOT
 
           echo "Running tests..."
