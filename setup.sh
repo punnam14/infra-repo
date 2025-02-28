@@ -16,4 +16,16 @@ git clone https://github.com/punnam14/hottake.git
 cd hottake/backend
 
 sudo python3 -m pip install -r requirements.txt
-sudo python3 -m pip install pytest
+
+# Ensure correct ownership & permissions
+sudo chown -R ec2-user:ec2-user /home/ec2-user/hottake/backend
+sudo chmod -R 775 /home/ec2-user/hottake/backend
+
+# Ensure SQLite test database exists with correct permissions
+sudo touch test.db
+sudo chown ec2-user:ec2-user test.db
+sudo chmod 666 test.db
+
+# Ensure pytest cache directory has correct permissions
+sudo mkdir -p .pytest_cache
+sudo chmod -R 777 .pytest_cache
