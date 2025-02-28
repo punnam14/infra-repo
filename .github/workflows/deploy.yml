@@ -53,8 +53,10 @@ jobs:
           docker-compose --version || echo "Docker Compose NOT installed"
           python3 --version || echo "Python3 NOT installed"
           pytest --version || echo "Pytest NOT installed"
+
           echo "Cloning repository..."
           git clone https://github.com/punnam14/hottake.git
+
           cd hottake
           echo "Creating .env file..."
           cat <<EOT > .env
@@ -62,12 +64,21 @@ jobs:
           OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
           EOT
 
-          echo "Starting application..."
-          docker-compose up -d
-          sleep 20  
+          echo "Creating .env file in backend directory..."
+          cat <<EOT > backend/.env
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+          EOT
 
           echo "Running tests..."
           cd backend
           python -m pytest
+
+          cd ..
+
+          echo "Starting application..."
+          docker-compose up -d
+          sleep 20  
+
           exit
           EOF
