@@ -18,7 +18,7 @@ jobs:
       - name: Launch Temporary EC2 for Testing
         run: |
           TEMP_INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-05b10e08d247fb927 \ 
+            --image-id ami-05b10e08d247fb927\
             --instance-type t2.micro \
             --key-name github-actions \
             --security-groups sg-05c24e6f774bd9b5d \
