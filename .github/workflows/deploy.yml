@@ -80,14 +80,17 @@ jobs:
             echo "✅ Tests PASSED!"
           fi
 
-          echo "Building and pushing Docker image..."
-          cd /home/ec2-user/hottake
+          echo "Building and pushing backend Docker image..."
+          cd /home/ec2-user/hottake/backend
+          docker build -t hottake-backend:latest .
+          docker tag hottake-backend:latest ${{ secrets.AWS_ECR_REPO }}/hottake-backend:latest
+          docker push ${{ secrets.AWS_ECR_REPO }}/hottake-backend:latest
 
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REPO }}
-
-          docker build -t hottake:latest .
-          docker tag hottake:latest ${{ secrets.AWS_ECR_REPO }}/hottake:latest
-          docker push ${{ secrets.AWS_ECR_REPO }}/hottake:latest
+          echo "Building and pushing frontend Docker image..."
+          cd /home/ec2-user/hottake/frontend
+          docker build -t hottake-frontend:latest .
+          docker tag hottake-frontend:latest ${{ secrets.AWS_ECR_REPO }}/hottake-frontend:latest
+          docker push ${{ secrets.AWS_ECR_REPO }}/hottake-frontend:latest
 
           exit $EXIT_CODE
           EOF
