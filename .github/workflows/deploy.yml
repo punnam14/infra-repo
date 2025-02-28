@@ -45,6 +45,14 @@ jobs:
           chmod 600 github-actions.pem  
 
       - name: Deploy & Test Application
+        env:
+          AWS_ECR_BACKEND: ${{ secrets.AWS_ECR_REPO }}
+          AWS_ECR_FRONTEND: ${{ secrets.AWS_ECR_REPO_FRONTEND }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENCAGE_API_KEY: ${{ secrets.OPENCAGE_API_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
         run: |
           ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@${{ env.TEMP_IP }} << 'EOF'
           echo "Checking installed versions..."
@@ -55,8 +63,8 @@ jobs:
           cd hottake
           echo "Creating .env file..."
           sudo tee .env > /dev/null <<EOT
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-          OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+          DATABASE_URL=${DATABASE_URL}
+          OPENCAGE_API_KEY=${OPENCAGE_API_KEY}
           EOT
 
           echo "Creating .env file in backend directory..."
@@ -79,6 +87,27 @@ jobs:
           else
             echo "✅ Tests PASSED!"
           fi
+
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set aws_session_token ${{ secrets.AWS_SESSION_TOKEN }}
+          aws configure set region us-east-1
+
+          echo "Authenticating Docker with AWS ECR..."
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_BACKEND}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_FRONTEND}
+
+          echo "Building and pushing backend Docker image..."
+          cd /home/ec2-user/hottake/backend
+          docker build -t hot-take-image .
+          docker tag hot-take-image:latest ${AWS_ECR_BACKEND}:latest
+          docker push ${AWS_ECR_BACKEND}:latest
+
+          echo "Building and pushing frontend Docker image..."
+          cd /home/ec2-user/hottake/frontend
+          docker build -t hot-take-image-frontend .
+          docker tag hot-take-image-frontend:latest ${AWS_ECR_FRONTEND}:latest
+          docker push ${AWS_ECR_FRONTEND}:latest
 
           exit $EXIT_CODE
           EOF
