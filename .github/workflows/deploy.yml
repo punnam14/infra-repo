@@ -67,6 +67,8 @@ jobs:
 
           echo "Running tests..."
           cd backend
+          sudo yum install -y sqlite
+          python3 -m pip install -r requirements.txt
           python3 -m pytest --maxfail=1 --disable-warnings --tb=short
           TEST_EXIT_CODE=\$?
 
