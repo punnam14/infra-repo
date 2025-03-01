@@ -104,6 +104,18 @@ jobs:
             echo "✅ Tests PASSED!"
           fi
 
+          echo "🔹 Building frontend..."
+          cd hottake/frontend
+          npm install
+          npm run build
+
+          # Step 2: Ensure build is successful
+          if [ ! -d "dist" ]; then
+            echo "❌ Frontend build failed! No dist folder found"
+            exit 1
+          fi
+          echo "✅ Frontend build successful!"
+
           echo "🔹 Checking AWS Credentials..."
           aws sts get-caller-identity || (echo "AWS Credentials Invalid!" && exit 1)
 
@@ -116,17 +128,18 @@ jobs:
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_BACKEND}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ECR_FRONTEND}
 
-          echo "Building and pushing backend Docker image..."
+          echo "🔹 Building and pushing backend Docker image..."
           cd /home/ec2-user/hottake/backend
           docker build -t hot-take-image .
           docker tag hot-take-image:latest ${AWS_ECR_BACKEND}:latest
           docker push ${AWS_ECR_BACKEND}:latest
 
-          echo "Building and pushing frontend Docker image..."
+          echo "🔹 Packaging frontend dist folder..."
           cd /home/ec2-user/hottake/frontend
-          docker build -t hot-take-image-frontend .
-          docker tag hot-take-image-frontend:latest ${AWS_ECR_FRONTEND}:latest
+          docker build -t frontend-dist -f frontend.Dockerfile .
+          docker tag frontend-dist:latest ${AWS_ECR_FRONTEND}:latest
           docker push ${AWS_ECR_FRONTEND}:latest
+          echo "✅ Frontend packaged and pushed to ECR"
 
           EOF
           exit $EXIT_CODE
@@ -175,7 +188,6 @@ jobs:
           docker pull $AWS_ECR_FRONTEND:latest
 
           echo "✅ Image pull complete!"
-
           
           echo "🔹 Stopping old containers..."
           docker-compose -f docker-compose.prod.yml down
