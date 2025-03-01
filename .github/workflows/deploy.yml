@@ -143,7 +143,7 @@ jobs:
         run: |
           eval "$(ssh-agent -s)"
           ssh-add github-actions.pem
-          ssh -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@54.196.94.185 << EOF
+          ssh -A -o StrictHostKeyChecking=no -i github-actions.pem ec2-user@54.196.94.185 << 'EOF'
           export AWS_ECR_BACKEND="${{ secrets.AWS_ECR_REPO }}"
           export AWS_ECR_FRONTEND="${{ secrets.AWS_ECR_REPO_FRONTEND }}"
           export DATABASE_URL="${{ secrets.DATABASE_URL }}"
@@ -152,7 +152,7 @@ jobs:
           export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export AWS_SESSION_TOKEN="${{ secrets.AWS_SESSION_TOKEN }}"
 
-          ssh ec2-user@172.31.110.113 << EOF
+          ssh ec2-user@172.31.110.113 << 'EOF_Inner'
           export AWS_ECR_BACKEND="${{ secrets.AWS_ECR_REPO }}"
           export AWS_ECR_FRONTEND="${{ secrets.AWS_ECR_REPO_FRONTEND }}"
           export DATABASE_URL="${{ secrets.DATABASE_URL }}"
@@ -186,5 +186,5 @@ jobs:
           echo "✅ Deployment complete!"
 
 
-
+          EOF_Inner
           EOF
