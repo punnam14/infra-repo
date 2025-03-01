@@ -128,8 +128,8 @@ jobs:
       #     docker tag hot-take-image-frontend:latest ${AWS_ECR_FRONTEND}:latest
       #     docker push ${AWS_ECR_FRONTEND}:latest
 
-      #     exit $EXIT_CODE
       #     EOF
+      #     exit $EXIT_CODE
 
       - name: Deploy to QA EC2
         env:
@@ -166,6 +166,14 @@ jobs:
 
           echo "✅ Image pull complete!"
 
+          
+          echo "🔹 Stopping old containers..."
+          docker-compose -f docker-compose.prod.yml down
+
+          echo "🔹 Starting new containers..."
+          docker-compose -f docker-compose.prod.yml up -d
+
+          echo "✅ Deployment complete!"
 
 
 
