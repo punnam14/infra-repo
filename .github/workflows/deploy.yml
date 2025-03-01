@@ -119,14 +119,14 @@ jobs:
           echo "Building and pushing backend Docker image..."
           cd /home/ec2-user/hottake/backend
           docker build -t hot-take-image .
-          docker tag hot-take-image:latest ${AWS_ECR_BACKEND}/hot-take-backend:latest
-          docker push ${AWS_ECR_BACKEND}/hot-take-backend:latest
+          docker tag hot-take-image:latest ${AWS_ECR_BACKEND}:latest
+          docker push ${AWS_ECR_BACKEND}:latest
 
           echo "Building and pushing frontend Docker image..."
           cd /home/ec2-user/hottake/frontend
           docker build -t hot-take-image-frontend .
-          docker tag hot-take-image-frontend:latest ${AWS_ECR_FRONTEND}/hot-take-frontend:latest
-          docker push ${AWS_ECR_FRONTEND}/hot-take-frontend:latest
+          docker tag hot-take-image-frontend:latest ${AWS_ECR_FRONTEND}:latest
+          docker push ${AWS_ECR_FRONTEND}:latest
 
           exit $EXIT_CODE
           EOF
