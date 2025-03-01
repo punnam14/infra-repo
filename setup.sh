@@ -3,6 +3,10 @@
 sudo yum update -y
 
 sudo yum install -y git python3 python3-pip docker
+curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo yum install -y nodejs
+node -v  
+npm -v   
 sudo systemctl start docker
 sudo systemctl enable docker
 sudo usermod -aG docker ec2-user
