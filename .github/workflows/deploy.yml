@@ -39,10 +39,10 @@ jobs:
       #       --output text)
       #     echo "TEMP_IP=$TEMP_IP" >> $GITHUB_ENV
       
-      # - name: Save Private Key for SSH
-      #   run: |
-      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > github-actions.pem
-      #     chmod 600 github-actions.pem  
+      - name: Save Private Key for SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > github-actions.pem
+          chmod 600 github-actions.pem  
 
       # - name: Deploy & Test Application
       #   env:
