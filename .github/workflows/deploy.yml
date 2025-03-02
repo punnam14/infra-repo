@@ -189,3 +189,9 @@ jobs:
 
          EOF_Inner
          EOF
+
+     - name: Terminate Temporary EC2 Instance
+       if: always()  
+       run: |
+         aws ec2 terminate-instances --instance-ids ${{ env.TEMP_INSTANCE_ID }}
+         echo "Terminating EC2 Instance: ${{ env.TEMP_INSTANCE_ID }}"
